@@ -1,30 +1,86 @@
 section .data
-teststr db "Hello%20World%21This%3Ais%3Aa%25test%0AEnd%2e", 10, 0
+teststr db "../../../../etc/passwd"
 teststrlen equ $ - teststr
+nl db 10
+
+err_illegal db "ERROR: That path is illegal!", 10
+err_illegal_len equ $ - err_illegal
 
 section .text
 
 extern malloc
 extern free
+
 extern hex2string
+extern path2stack
 
 global _start
 
 _start:
-    ; try hex2string
     mov eax, teststr
     mov ebx, teststrlen
     call hex2string
 
-    
-    ; write it
+    push eax
+    push ebx
     mov edx, ebx
     mov ecx, eax
     mov ebx, 1
     mov eax, 4
     int 0x80
+    call newline
+    call newline
+    pop ebx
+    pop eax
+    
+    call path2stack
 
-    ; die
+    cmp eax, 0xFFFFFFFF
+    je .failpath
+
+    mov edx, eax
+    imul edx, 8
+    mov esi, esp
+    add esi, edx
+
+.print:
+    cmp eax, 0
+    je .die
+    mov ebx, [esi-8]
+    mov ecx, [esi-4]
+    sub esi, 8
+
+    push eax
+    mov eax, 4
+    mov edx, ecx
+    mov ecx, ebx
+    mov ebx, 1
+    int 0x80
+    call newline
+    pop eax
+
+    dec eax
+    jmp .print
+
+.die:
     mov eax, 1
     mov ebx, 0
     int 0x80
+
+.failpath:
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, err_illegal
+    mov edx, err_illegal_len
+    int 0x80
+    jmp .die
+
+
+
+newline:
+    mov edx, 1
+    mov ecx, nl
+    mov ebx, 1
+    mov eax, 4
+    int 0x80
+    ret
