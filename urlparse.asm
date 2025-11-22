@@ -60,8 +60,8 @@ hex2string:
         mov dl, ch
         shl edx, 4
         mov ch, 0
-        or dx, cx
-        mov cx, dx
+        or dl, cl
+        mov cl, dl
         pop edx
 
         .transdone:

@@ -1,5 +1,5 @@
 section .data
-teststr db "../../../../etc/passwd"
+teststr db "/te%73t/.h./..\./f%6F%6F/.././b.ar/..hidden/./.../fi%6C%65/pa%74h/..%2Fnot-actually-up/./here.we/are..."
 teststrlen equ $ - teststr
 nl db 10
 
