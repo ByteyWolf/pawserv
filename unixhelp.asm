@@ -1,69 +1,55 @@
-section .data
-crtbreak dd 0
-allocbreak dd 0
-
 section .text
-global meminit
-global alloc
+global malloc
 global free
 
-meminit:
-    mov eax, 45
-    xor ebx, ebx
-    int 0x80
-    mov [crtbreak], eax
-    mov [allocbreak], eax
-    ret
-
-; pass size in ebx, returns ptr in eax, actual allocated size in ebx
-alloc:
-    ; align memory to 4 bytes
-    add ebx, 3
-    and ebx, 0xFFFFFFFC
+malloc:
+    ; ebx - size
     push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+    push ebp
     
-    ; check if crtbreak + requested > actual heap
-    mov eax, [crtbreak]
-    add ebx, eax
-    cmp ebx, [allocbreak]
-    ja .moveup
-    
-    ; our request fits in existing heap
-    mov eax, [crtbreak]
-    mov [crtbreak], ebx
-    pop ebx
-    ret
-
-    .moveup:
-    ; move break up to new bound
-    mov eax, 45
-    ; ebx already contains new break address
-    int 0x80
-    
-    ; check if syscall succeeded
-    cmp eax, 0
-    jl .failure
-    
-    mov [allocbreak], eax
-    
-    ; check result
-    pop ebx
-    mov eax, [crtbreak]
-    add ebx, eax
-    cmp ebx, [allocbreak]
-    ja .failure
-    
-    mov eax, [crtbreak]
-    mov [crtbreak], ebx
-    sub ebx, eax
-    ret
-
-    .failure:
-    xor eax, eax
+    mov ecx, ebx
+    mov eax, 0x5a
     xor ebx, ebx
-    ret
+    mov edx, 3
+    mov esi, 0x22
+    xor edi, edi
+    xor ebp, ebp
+    int 0x80
 
-; pass size in ebx
+    pop ebp
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+
+    ; eax - addr
+    ; ebx - size
+
 free:
-    sub [crtbreak], ebx
-    ret
+    ; eax - addr
+    ; ebx - size
+
+    push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+    push ebp
+
+    mov ecx, ebx
+    mov ebx, eax
+    mov eax, 91
+    int 0x80
+
+    pop ebp
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    ; eax - 0 on success
