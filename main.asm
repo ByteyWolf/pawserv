@@ -19,6 +19,13 @@ extern path2stack
 
 extern openconfig
 
+extern srvrootstr
+extern bashrootstr
+extern srv_anonymous
+extern srv_logaccess
+
+extern strlen
+
 global _start
 global die
 
@@ -26,6 +33,16 @@ global filebuf
 
 _start:
     call openconfig
+
+    mov eax, [srvrootstr]
+    call strlen
+
+    mov edx, eax
+    mov ecx, [srvrootstr]
+    mov ebx, 1
+    mov eax, 4
+    int 0x80
+    call newline
 
     mov eax, teststr
     mov ebx, teststrlen

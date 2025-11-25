@@ -4,7 +4,7 @@ LD   = ld
 NASMFLAGS = -f elf32 -g -F dwarf
 LDFLAGS   = -m elf_i386
 
-ASM_SRCS = main.asm unixhelp.asm urlparse.asm confpars.asm
+ASM_SRCS = main.asm unixhelp.asm urlparse.asm confpars.asm strings.asm
 OBJ_FILES = $(ASM_SRCS:.asm=.o)
 
 TARGET = prog
