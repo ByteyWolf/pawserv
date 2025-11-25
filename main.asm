@@ -1,10 +1,13 @@
-section .data
-teststr db "/te%73t/.h./..\./f%6F%6F/.././b.ar/..hidden/./.../fi%6C%65/pa%74h/..%2Fnot-actually-up/./here.we/are..."
-teststrlen equ $ - teststr
-nl db 10
+section .bss
+    filebuf: RESB 4096
 
-err_illegal db "ERROR: That path is illegal!", 10
-err_illegal_len equ $ - err_illegal
+section .data
+    teststr db "/te%73t/.h./..\./f%6F%6F/.././b.ar/..hidden/./.../fi%6C%65/pa%74h/..%2Fnot-actually-up/./here.we/are..."
+    teststrlen equ $ - teststr
+    nl db 10
+
+    err_illegal db "ERROR: That path is illegal!", 10
+    err_illegal_len equ $ - err_illegal
 
 section .text
 
@@ -14,9 +17,16 @@ extern free
 extern hex2string
 extern path2stack
 
+extern openconfig
+
 global _start
+global die
+
+global filebuf
 
 _start:
+    call openconfig
+
     mov eax, teststr
     mov ebx, teststrlen
     call hex2string
@@ -45,7 +55,7 @@ _start:
 
 .print:
     cmp eax, 0
-    je .die
+    je die
     mov ebx, [esi-8]
     mov ecx, [esi-4]
     sub esi, 8
@@ -62,18 +72,13 @@ _start:
     dec eax
     jmp .print
 
-.die:
-    mov eax, 1
-    mov ebx, 0
-    int 0x80
-
 .failpath:
     mov eax, 4
     mov ebx, 1
     mov ecx, err_illegal
     mov edx, err_illegal_len
     int 0x80
-    jmp .die
+    jmp die
 
 
 
@@ -84,3 +89,8 @@ newline:
     mov eax, 4
     int 0x80
     ret
+
+die:
+    mov eax, 1
+    mov ebx, 0
+    int 0x80
